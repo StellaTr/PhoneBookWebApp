@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { SearchForm } from './SearchForm'
 import { Container, Row, Col } from 'reactstrap';
+import PhoneBookEntries from './PhoneBookEntries'
 
 
 export class Home extends Component {
@@ -34,7 +35,13 @@ export class Home extends Component {
                 </Row>
                 <br />
                 <br />
-                <Row>                    
+                <Row>     
+                    <Col>
+                        {
+                            (this.state.entries !== '') &&
+                            <PhoneBookEntries entries={this.state.entries} />
+                        }
+                    </Col>
                 </Row>
             </Container>
         );
