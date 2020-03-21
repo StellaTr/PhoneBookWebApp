@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PhoneBookWebApp.Data;
+using PhoneBookWebApp.Entities;
+using PhoneBookWebApp.Models;
 using PhoneBookWebApp.Repository;
 
 namespace PhoneBookWebApp
@@ -35,6 +38,16 @@ namespace PhoneBookWebApp
 
             services.AddDbContext<PhoneBookContext>(options =>
               options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            var autoMapperConfig = new MapperConfiguration(cfg => {
+                cfg.CreateMap<Contact, ContactDto>()
+                .ForMember(dest => dest.ContactPhones, opt => opt.MapFrom(src => src.ContactPhones))
+                .ReverseMap();
+                cfg.CreateMap<ContactPhone, ContactPhoneDto>()
+                .ReverseMap();                
+            });
+
+            services.AddSingleton<IMapper>(s => new Mapper(autoMapperConfig));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
