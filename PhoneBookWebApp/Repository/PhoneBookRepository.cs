@@ -94,5 +94,31 @@ namespace PhoneBookWebApp.Repository
         {
             return await _context.Contacts.FindAsync(contactId);
         }
+
+        public void UpdateContact(Contact contactForUpdate)
+        {
+            var currentContact = _context.Contacts
+                .Where(c => c.ContactId == contactForUpdate.ContactId)
+               .Include(c => c.ContactPhones)
+               .AsNoTracking()
+               .SingleOrDefault();
+
+            _context.Entry(contactForUpdate).State = EntityState.Modified;
+
+            foreach (var contactPhone in contactForUpdate.ContactPhones)
+            {
+                bool contactPhoneExists = currentContact.ContactPhones.Any(c => c.ContactPhoneId == contactPhone.ContactPhoneId);
+
+                if (!contactPhoneExists)
+                    return;
+
+                _context.Entry(contactPhone).State = EntityState.Modified;
+            }
+        }
+
+        public Task<bool> ContactExistsAsync(int contactId)
+        {
+            return _context.Contacts.AnyAsync(c => c.ContactId == contactId);
+        }
     }
 }

@@ -14,5 +14,7 @@ namespace PhoneBookWebApp.Repository
         void AddContact(Contact contact);
         Task SaveAsync();
         Task<Contact> FindAsync(int id);
+        void UpdateContact(Contact contact);
+        Task<bool> ContactExistsAsync(int contactId);
     }
 }

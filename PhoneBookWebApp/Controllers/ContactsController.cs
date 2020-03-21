@@ -103,5 +103,35 @@ namespace PhoneBookWebApp.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateContact(int id, ContactDto contact)
+        {
+            try
+            {
+                if (id != contact.ContactId)
+                {
+                    return BadRequest();
+                }
+
+                bool contactExists = await _repository.ContactExistsAsync(id);
+
+                if (!contactExists)
+                {
+                    return BadRequest();
+                }
+
+                Contact contactFromRepo = _mapper.Map<Contact>(contact);
+
+                _repository.UpdateContact(contactFromRepo);
+                await _repository.SaveAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
     }
 }
