@@ -44,7 +44,10 @@ namespace PhoneBookWebApp
                 .ForMember(dest => dest.ContactPhones, opt => opt.MapFrom(src => src.ContactPhones))
                 .ReverseMap();
                 cfg.CreateMap<ContactPhone, ContactPhoneDto>()
-                .ReverseMap();                
+                .ReverseMap();
+                cfg.CreateMap<ContactEntry, Contact>()
+                .ForMember(dest => dest.ContactPhones, opt => opt.MapFrom(src => src.ContactPhones));
+                cfg.CreateMap<ContactPhoneEntry, ContactPhone>();
             });
 
             services.AddSingleton<IMapper>(s => new Mapper(autoMapperConfig));

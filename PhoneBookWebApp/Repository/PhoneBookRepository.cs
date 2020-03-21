@@ -54,5 +54,45 @@ namespace PhoneBookWebApp.Repository
 
             return await contacts.ToListAsync();
         }
+
+        public void AddContact(Contact contact)
+        {
+            if (contact == null)
+                throw new ArgumentNullException();
+
+            if (!ContactExists(contact.FirstName, contact.LastName))
+            {
+                _context.Contacts.Add(contact);
+            }
+            else
+            {
+                Contact existingContact = GetContactByName(contact.FirstName, contact.LastName);
+                ContactPhone phoneEntry = contact.ContactPhones.First();
+
+                existingContact.ContactPhones.Add(phoneEntry);
+
+                _context.Contacts.Update(existingContact);
+            }
+        }
+
+        private Contact GetContactByName(string firstname, string lastname)
+        {
+            return _context.Contacts.Include(c => c.ContactPhones).First(c => c.FirstName == firstname && c.LastName == lastname);
+        }
+
+        private bool ContactExists(string firstname, string lastname)
+        {
+            return _context.Contacts.Any(c => c.FirstName == firstname && c.LastName == lastname);
+        }
+
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Contact> FindAsync(int contactId)
+        {
+            return await _context.Contacts.FindAsync(contactId);
+        }
     }
 }

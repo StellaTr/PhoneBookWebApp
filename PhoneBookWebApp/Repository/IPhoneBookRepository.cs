@@ -11,5 +11,8 @@ namespace PhoneBookWebApp.Repository
         Task<Contact> GetContact(int id);
         Task<IEnumerable<Contact>> SearchContactsByNameAsync(string name);
         Task<IEnumerable<Contact>> SearchContactsByPhoneAsync(string phone);
+        void AddContact(Contact contact);
+        Task SaveAsync();
+        Task<Contact> FindAsync(int id);
     }
 }
