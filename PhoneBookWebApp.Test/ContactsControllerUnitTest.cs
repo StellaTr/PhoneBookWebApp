@@ -359,5 +359,93 @@ namespace PhoneBookWebApp.Test
             var result = actionResult.Result as OkObjectResult;
             Assert.Null(result.Value);
         }
+
+        [Fact]
+        public async Task PostContact_SendNullValue()
+        {
+            var repositoryMock = new Mock<IPhoneBookRepository>();
+            var mapperMock = new Mock<IMapper>();
+
+            var controller = new ContactsController(repositoryMock.Object, mapperMock.Object);
+            var actionResult = await controller.PostContact(null);
+
+            Assert.IsAssignableFrom<BadRequestResult>(actionResult.Result);
+        }
+
+        [Fact]
+        public async Task PostContact_SuccessfulAdd()
+        {
+            ContactEntry newEnrty = new ContactEntry()
+            {
+                FirstName = "Mary",
+                LastName = "Philips",
+                ContactPhones = new List<ContactPhoneEntry>()
+                {
+                    new ContactPhoneEntry()
+                    {
+                        CountryCode = "10",
+                        AreaCode = "210",
+                        PhoneNumber = "78452139"
+                    }
+                }
+            };
+
+            Contact contact = new Contact()
+            {
+                ContactId = 3,
+                FirstName = "Mary",
+                LastName = "Philips",
+                ContactPhones = new List<ContactPhone>()
+                {
+                    new ContactPhone()
+                    {
+                        ContactId = 3,
+                        ContactPhoneId = 4,
+                        CountryCode = "10",
+                        AreaCode = "210",
+                        PhoneNumber = "78452139"
+                    }
+                }
+            };
+
+            ContactDto returnedContact = new ContactDto()
+            {
+                ContactId = 3,
+                FirstName = "Mary",
+                LastName = "Philips",
+                ContactPhones = new List<ContactPhoneDto>()
+                {
+                    new ContactPhoneDto()
+                    {
+                        ContactId = 3,
+                        ContactPhoneId = 4,
+                        CountryCode = "10",
+                        AreaCode = "210",
+                        PhoneNumber = "78452139"
+                    }
+                }
+            };
+
+            var mapperMock = new Mock<IMapper>();
+            mapperMock.Setup(m => m.Map<Contact>(It.IsAny<ContactEntry>()))
+                .Returns(contact);
+
+            mapperMock.Setup(m => m.Map<ContactDto>(It.IsAny<Contact>()))
+               .Returns(returnedContact);
+
+            var repositoryMock = new Mock<IPhoneBookRepository>();
+            repositoryMock
+               .Setup(m => m.AddContact(contact));
+
+            repositoryMock
+               .Setup(m => m.SaveAsync());
+
+            var controller = new ContactsController(repositoryMock.Object, mapperMock.Object);
+            var actionResult = await controller.PostContact(newEnrty);
+
+            var result = actionResult.Result as CreatedAtActionResult;
+            Assert.NotNull(result.Value);
+            Assert.Equal(returnedContact, result.Value);
+        }        
     }
 }
