@@ -7,6 +7,7 @@ using PhoneBookWebApp.Models;
 using PhoneBookWebApp.Repository;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -569,6 +570,104 @@ namespace PhoneBookWebApp.Test
             var actionResult = await controller.UpdateContact(1, contactForUpdate);
 
             Assert.IsAssignableFrom<NoContentResult>(actionResult);
+        }
+
+        [Fact]
+        public async Task GetContactAndPhone_FoundMatchingElement()
+        {
+            Contact contactFromRepo = new Contact()
+            {
+                ContactId = 1,
+                FirstName = "John",
+                LastName = "Doe",
+                ContactPhones = new List<ContactPhone>()
+                {
+                    new ContactPhone()
+                    {
+                        ContactPhoneId = 1,
+                        ContactId = 1,
+                        CountryCode = "30",
+                        AreaCode = "478",
+                        PhoneNumber = "123456"
+                    }
+                }
+            };
+
+            ContactDto returnedContact = new ContactDto()
+            {
+                ContactId = 1,
+                FirstName = "John",
+                LastName = "Doe",
+                ContactPhones = new List<ContactPhoneDto>()
+                {
+                    new ContactPhoneDto()
+                    {
+                        ContactPhoneId = 1,
+                        ContactId = 1,
+                        CountryCode = "30",
+                        AreaCode = "478",
+                        PhoneNumber = "123456"
+                    }
+                }
+            };
+
+            var repositoryMock = new Mock<IPhoneBookRepository>();
+            repositoryMock
+                .Setup(m => m.ContactExistsAsync(1))
+                .ReturnsAsync(true);
+
+            repositoryMock
+                .Setup(m => m.GetContactPhone(1, 1))
+                .ReturnsAsync(contactFromRepo.ContactPhones.First());
+
+            var mapperMock = new Mock<IMapper>();
+            mapperMock.Setup(m => m.Map<ContactDto>(It.IsAny<ContactDto>()))
+                .Returns(returnedContact);
+
+            var controller = new ContactsController(repositoryMock.Object, mapperMock.Object);
+            var actionResult = await controller.GetContactAndPhone(1, 1);
+
+            var result = actionResult.Result as OkObjectResult;
+            Assert.NotNull(result.Value);
+            Assert.Equal(returnedContact, result.Value);
+        }
+
+        [Fact]
+        public async Task GetContactAndPhone_NotFoundMatchingContactId()
+        {
+            var repositoryMock = new Mock<IPhoneBookRepository>();
+            repositoryMock
+                .Setup(m => m.ContactExistsAsync(1))
+                .ReturnsAsync(false);
+
+            var mapperMock = new Mock<IMapper>();
+            mapperMock.Setup(m => m.Map<ContactDto>(It.IsAny<ContactDto>()));
+
+            var controller = new ContactsController(repositoryMock.Object, mapperMock.Object);
+            var actionResult = await controller.GetContactAndPhone(1, 1);
+
+            Assert.IsAssignableFrom<NotFoundResult>(actionResult.Result);
+        }
+
+        [Fact]
+        public async Task GetContactAndPhone_NotFoundMatchingContactPhoneId()
+        {
+            var repositoryMock = new Mock<IPhoneBookRepository>();
+            repositoryMock
+                .Setup(m => m.ContactExistsAsync(1))
+                .ReturnsAsync(true);
+
+            repositoryMock
+                .Setup(m => m.GetContactPhone(1, 1))
+                .ReturnsAsync((ContactPhone)null);
+
+            var mapperMock = new Mock<IMapper>();
+            mapperMock.Setup(m => m.Map<ContactDto>(It.IsAny<ContactDto>()));
+
+            var controller = new ContactsController(repositoryMock.Object, mapperMock.Object);
+            var actionResult = await controller.GetContactAndPhone(1, 1);
+
+            Assert.IsAssignableFrom<NotFoundResult>(actionResult.Result);
         }
     }
 }
