@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PhoneBookWebApp.Data;
+using PhoneBookWebApp.Repository;
 
 namespace PhoneBookWebApp
 {
@@ -29,6 +30,8 @@ namespace PhoneBookWebApp
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            services.AddScoped<IPhoneBookRepository, PhoneBookRepository>();
 
             services.AddDbContext<PhoneBookContext>(options =>
               options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
