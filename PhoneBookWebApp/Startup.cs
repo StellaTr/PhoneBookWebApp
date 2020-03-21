@@ -30,7 +30,7 @@ namespace PhoneBookWebApp
                 options.AddDefaultPolicy(
                     builder => {
                         builder
-                        .WithOrigins("http://localhost:3000")
+                        .WithOrigins(Configuration.GetSection("ClientApp").Value)
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                     });
@@ -100,7 +100,7 @@ namespace PhoneBookWebApp
                 if (env.IsDevelopment())
                 {
                     //spa.UseReactDevelopmentServer(npmScript: "start");
-                    spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
+                    spa.UseProxyToSpaDevelopmentServer(Configuration.GetSection("ClientApp").Value);
                 }
             });
         }
