@@ -446,6 +446,129 @@ namespace PhoneBookWebApp.Test
             var result = actionResult.Result as CreatedAtActionResult;
             Assert.NotNull(result.Value);
             Assert.Equal(returnedContact, result.Value);
-        }        
+        }
+
+        [Fact]
+        public async Task UpdateContact_InconsinstentContactId()
+        {
+            ContactDto contactForUpdate = new ContactDto()
+            {
+                ContactId = 1,
+                FirstName = "John",
+                LastName = "Doe",
+                ContactPhones = new List<ContactPhoneDto>()
+                {
+                    new ContactPhoneDto()
+                    {
+                        ContactPhoneId = 1,
+                        ContactId = 1,
+                        CountryCode = "30",
+                        AreaCode = "478",
+                        PhoneNumber = "123456"
+                    }
+                }
+            };
+
+            var mapperMock = new Mock<IMapper>();
+            var repositoryMock = new Mock<IPhoneBookRepository>();
+
+            var controller = new ContactsController(repositoryMock.Object, mapperMock.Object);
+            var actionResult = await controller.UpdateContact(2, contactForUpdate);
+
+            Assert.IsAssignableFrom<BadRequestResult>(actionResult);
+        }
+
+        [Fact]
+        public async Task UpdateContact_ContactDoesNotExist()
+        {
+            ContactDto contactForUpdate = new ContactDto()
+            {
+                ContactId = 1,
+                FirstName = "John",
+                LastName = "Doe",
+                ContactPhones = new List<ContactPhoneDto>()
+                {
+                    new ContactPhoneDto()
+                    {
+                        ContactPhoneId = 1,
+                        ContactId = 1,
+                        CountryCode = "30",
+                        AreaCode = "478",
+                        PhoneNumber = "123456"
+                    }
+                }
+            };
+
+            var mapperMock = new Mock<IMapper>();
+            var repositoryMock = new Mock<IPhoneBookRepository>();
+            repositoryMock
+                .Setup(m => m.ContactExistsAsync(It.IsAny<int>()))
+                .ReturnsAsync(false);
+
+            var controller = new ContactsController(repositoryMock.Object, mapperMock.Object);
+            var actionResult = await controller.UpdateContact(1, contactForUpdate);
+
+            Assert.IsAssignableFrom<BadRequestResult>(actionResult);
+        }
+
+        [Fact]
+        public async Task UpdateContact_SuccessfulUpdate()
+        {
+            Contact updatedContact = new Contact()
+            {
+                ContactId = 1,
+                FirstName = "John",
+                LastName = "Doe",
+                ContactPhones = new List<ContactPhone>()
+                {
+                    new ContactPhone()
+                    {
+                        ContactPhoneId = 1,
+                        ContactId = 1,
+                        CountryCode = "30",
+                        AreaCode = "478",
+                        PhoneNumber = "123456"
+                    }
+                }
+            };
+
+            ContactDto contactForUpdate = new ContactDto()
+            {
+                ContactId = 1,
+                FirstName = "John",
+                LastName = "Doe",
+                ContactPhones = new List<ContactPhoneDto>()
+                {
+                    new ContactPhoneDto()
+                    {
+                        ContactPhoneId = 1,
+                        ContactId = 1,
+                        CountryCode = "30",
+                        AreaCode = "478",
+                        PhoneNumber = "123456"
+                    }
+                }
+            };
+
+            var mapperMock = new Mock<IMapper>();
+            mapperMock.Setup(m => m.Map<Contact>(It.IsAny<ContactDto>()))
+             .Returns(updatedContact);
+
+            var repositoryMock = new Mock<IPhoneBookRepository>();
+            repositoryMock
+                .Setup(m => m.ContactExistsAsync(It.IsAny<int>()))
+                .ReturnsAsync(true);
+
+            repositoryMock
+              .Setup(m => m.UpdateContact(It.IsAny<Contact>()));
+
+            repositoryMock
+                .Setup(m => m.SaveAsync());
+
+            var controller = new ContactsController(repositoryMock.Object, mapperMock.Object);
+            var actionResult = await controller.UpdateContact(1, contactForUpdate);
+
+            Assert.IsAssignableFrom<NoContentResult>(actionResult);
+        }
     }
 }
