@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { SearchForm } from './SearchForm'
-import { Container, Row, Col } from 'reactstrap';
+import { Container, Row, Col, Button } from 'reactstrap';
 import PhoneBookEntries from './PhoneBookEntries'
+import { Link } from 'react-router-dom';
 
 
 export class Home extends Component {
@@ -31,7 +32,12 @@ export class Home extends Component {
                 <Row>
                     <Col lg>
                         <SearchForm onSubmit={this.displayMatchingEntries} />
-                    </Col>                    
+                    </Col>  
+                    <Col lg>
+                        <Link to='/add'>
+                            <Button color="primary" size="md">Add New Entry</Button>
+                        </Link>
+                    </Col>
                 </Row>
                 <br />
                 <br />
