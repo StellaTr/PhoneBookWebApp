@@ -76,6 +76,35 @@ namespace PhoneBookWebApp.Controllers
             }
         }
 
+        [HttpGet("{contactId}/contactphones/{contactPhoneId}")]
+        public async Task<ActionResult<ContactDto>> GetContactAndPhone(int contactId, int contactPhoneId)
+        {
+            try
+            {
+                bool contactExists = await _repository.ContactExistsAsync(contactId);
+
+                if (!contactExists)
+                {
+                    return NotFound();
+                }
+
+                var contactPhoneFromRepo = await _repository.GetContactPhone(contactId, contactPhoneId);
+
+                if (contactPhoneFromRepo == null)
+                {
+                    return NotFound();
+                }
+
+                ContactDto contactDto = _mapper.Map<ContactDto>(contactPhoneFromRepo.Contact);
+
+                return Ok(contactDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
         [HttpPost]
         public async Task<ActionResult<ContactDto>> PostContact(ContactEntry contact)
         {

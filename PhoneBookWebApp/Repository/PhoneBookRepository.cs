@@ -120,5 +120,15 @@ namespace PhoneBookWebApp.Repository
         {
             return _context.Contacts.AnyAsync(c => c.ContactId == contactId);
         }
+
+        public async Task<ContactPhone> GetContactPhone(int contactId, int contactPhoneId)
+        {
+            IQueryable<ContactPhone> contactPhone = _context.ContactPhones
+                .Where(p => p.ContactPhoneId == contactPhoneId)
+                .Include(c => c.Contact)
+                .AsNoTracking();
+
+            return await contactPhone.FirstOrDefaultAsync();
+        }
     }
 }
