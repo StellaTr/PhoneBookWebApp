@@ -6,6 +6,10 @@ const resolveApiURL = (action, value = "") => {
             return baseURL + `?searchQuery=${value}`;       
         case "post":
             return baseURL;
+        case "getContactPhone":
+            return baseURL + `/${value.contactId}/contactphones/${value.contactPhoneId}`;
+        case "put":
+            return baseURL + `/${value}`;
         default:
             break;
     }

@@ -1,11 +1,23 @@
 ﻿import React from 'react';
 import { Table } from 'reactstrap';
+import { Link } from 'react-router-dom';
 
 const TableRow = (props) => (
     <tr>
         <td>{props.entry.firstName}</td>
         <td>{props.entry.lastName}</td>
-        <td>+{props.entry.countryCode} {props.entry.areaCode} {props.entry.phoneNumber}</td>        
+        <td>+{props.entry.countryCode} {props.entry.areaCode} {props.entry.phoneNumber}</td>      
+        <td>
+            <Link to={{
+                pathname: '/edit',
+                state: {
+                    contactId: props.entry.contactId,
+                    contactPhoneId: props.entry.contactPhoneId
+                }
+            }}>
+                Edit
+             </Link>
+        </td>
     </tr>
 );
 
